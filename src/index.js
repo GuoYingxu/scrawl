@@ -10,7 +10,7 @@ import _ from 'lodash'
  * @param {*} options 
  * 初始化容器
  */
-let zr;
+let __zr = null;
 let drawType = "";
 
 let startX = 0;
@@ -19,38 +19,27 @@ let endX = 0;
 let endY = 0;
 let shapes = []; //存放记录
 let isDown = false;
-let input;
-let box;
+let input = null;
+let msgCallback = null
 
-function __init(options) {
-  zr = zrender.init(options.target)
+function init(options) {
+  msgCallback = options.callback
+
+  __zr = zrender.init(options.target)
   let img = options.data || options.target
-  box = new Group({
-    style: {
-      hasStroke: () => {
-        return false
-      }
-    },
-    brush: () => {
-      return null
-    }
-  })
-  zr.add(box);
-  box.add(new Image({
+  __zr.add(new Image({
     style: {
       image: img,
       x: 0,
       y: 0,
     }
   }))
-  zr.on("mousedown", e => {
+  __zr.on("mousedown", e => {
     startX = e.offsetX;
     startY = e.offsetY;
     if (drawType === "") {
       if (input) {
         if (e.event.target !== input) {
-          // drawText();
-
           addText();
         }
       }
@@ -59,23 +48,25 @@ function __init(options) {
     if (drawType === "rect") {
       isDown = true;
     } else if (drawType === "text") {
-      console.log(input)
       if (!input) {
         initText(e.offsetX, e.offsetY);
       }
     }
   })
-  zr.on("mouseup", e => {
+  __zr.on("mouseup", e => {
     endX = e.offsetX;
     endY = e.offsetY;
     isDown = false
     if (drawType == "rect") {
       drawRect();
+      if (msgCallback && typeof msgCallback === "function") {
+        msgCallback.call(this, "rect")
+      }
     }
     drawType = "";
-    console.log("drawType", drawType)
+
   })
-  zr.on("mousemove", e => {
+  __zr.on("mousemove", e => {
     if (!isDown) return
     if (drawType === "rect") {
       endX = e.offsetX;
@@ -103,7 +94,7 @@ function startRect() {
     }
 
   });
-  box.add(temp);
+  __zr.add(temp);
   shapes.push(temp.id);
 }
 
@@ -111,14 +102,13 @@ function drawRect() {
   if (drawType === "rect") {
     let id = _.last(shapes);
     if (id) {
-      let list = box.children()
+      let list = __zr.storage.getDisplayList()
       let s = _.find(list, c => c.id == id)
 
       let _sx = startX > endX ? endX : startX;
       let _sy = startY > endY ? endY : startY;
       let _w = Math.abs(startX - endX);
       let _h = Math.abs(startY - endY);
-      console.log(_sx, _sy, _w, _h)
       if (s) {
         s.setShape({ x: _sx, y: _sy, width: _w, height: _h })
       }
@@ -135,10 +125,10 @@ function removeByStep() {
   if (shapes.length > 0) {
     let id = shapes.splice(shapes.length - 1, 1);
     if (id) {
-      let list = box.children()
+      let list = __zr.storage.getDisplayList()
       let s = _.find(list, sub => sub.id == id)
       if (s) {
-        box.remove(s)
+        __zr.remove(s)
       }
     }
   }
@@ -148,11 +138,11 @@ function removeByStep() {
  */
 function removeAll() {
   if (shapes.length > 0) {
-    let list = box.children()
+    let list = __zr.storage.getDisplayList()
     shapes.forEach((id) => {
       let s = _.find(list, sub => sub.id == id)
       if (s) {
-        box.remove(s)
+        __zr.remove(s)
       }
     })
     shapes = [];
@@ -161,20 +151,19 @@ function removeAll() {
 
 function startText() {
   drawType = "text";
-  // initText();
 }
 
 function initText(px, py) {
   input = document.createElement('textArea');
-  zr.dom.appendChild(input)
+  __zr.dom.appendChild(input)
   input.style.border = "1px solid red";
   input.style.position = "absolute";
-  input.style.left = px;
-  input.style.top = py;
+  input.style.left = px + 'px';
+  input.style.top = py + 'px';
   input.style.fontSize = "18px"
   input.style.color = "red"
   input.style.background = "transparent"
-  zr.dom.getElementsByTagName("div")[0].appendChild(input);
+  __zr.dom.getElementsByTagName("div")[0].appendChild(input);
   setTimeout(() => {
     input.focus()
   }, 100)
@@ -193,14 +182,21 @@ function addText() {
       position: [parseInt(input.style.left.replace('px', '')), parseInt(input.style.top.replace('px', ''))]
     })
     shapes.push(temp.id);
-    box.add(temp)
+    __zr.add(temp)
   }
-  zr.dom.getElementsByTagName("div")[0].removeChild(input)
+  __zr.dom.getElementsByTagName("div")[0].removeChild(input)
   input = null;
+  if (msgCallback && typeof msgCallback === "function") {
+    msgCallback.call(this, "text")
+  }
 }
 
 function getImage() {
-  return zr.dom.getElementsByTagName("canvas")[0].toDataURL('image/png')
+  return __zr.dom.getElementsByTagName("canvas")[0].toDataURL('image/png')
+}
+
+function stopAll() {
+  drawType = "";
 }
 /**
  * 
@@ -218,12 +214,6 @@ global.Scrawl = {
   removeByStep: removeByStep,
   removeAll: removeAll,
   startText: startText,
-  getImage: getImage
-
-}
-
-function init(options) {
-  __init(options);
-  console.log('welcome!')
-  console.log(document.getElementById("imgContainer"))
+  getImage: getImage,
+  stopAll: stopAll
 }
