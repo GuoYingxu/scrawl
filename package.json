@@ -1,0 +1,21 @@
+{
+  "name": "scrawl",
+  "version": "1.0.0",
+  "description": "A editor for picture in web ,jast like weixin capture",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server --open"
+  },
+  "author": "Guoyingxu",
+  "license": "ISC",
+  "devDependencies": {
+    "html-webpack-plugin": "^2.30.1",
+    "webpack": "^3.8.1",
+    "webpack-dev-server": "^2.9.4"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "zrender": "^3.7.4"
+  }
+}

@@ -1,0 +1,41 @@
+<html>
+
+<head>
+  <title>test scrawl</title>
+  <style>
+    #imgContainer,
+    #imgContainerCopy {
+      width: 400px;
+      height: 300px;
+      text-align: center;
+      float: left;
+    }
+    
+    #imgContainer img {
+      width: 400px;
+      height: 300px;
+    }
+    
+    #buttons {
+      float: left
+    }
+  </style>
+  <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+</head>
+
+<body>
+  <div id="imgContainer">
+    <img src="pic.jpg">
+  </div>
+  <div id="imgContainerCopy"></div>
+  <div id="buttons">
+    <button id="rect">Rect</button>
+    <button id="text">text</button>
+    <button id="clearAll">clearAll</button>
+    <button id="clearByStep">clearByStep</button>
+    <button id="capture">capture</button>
+  </div>
+  <canvas id="imgCanvas" width="400" height="300" style="width:400px; height:300px"></canvas>
+</body>
+
+</html>
