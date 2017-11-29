@@ -2,6 +2,8 @@ $(function() {
   Scrawl.init({
     target: $("#imgContainerCopy")[0],
     data: $("#imgContainer img")[0],
+    targetWidth: 200,
+    targetHeight: 150,
     callback: function(type) {
       console.log('-----')
       console.log(type)

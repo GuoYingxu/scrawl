@@ -32,6 +32,9 @@ function init(options) {
       image: img,
       x: 0,
       y: 0,
+
+      width: options.targetWidth,
+      height: options.targetHeight
     }
   }))
   __zr.on("mousedown", e => {
